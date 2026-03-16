@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto-évaluation d'établissement — Formation Sophiae</title>
+<style>
+  :root {
+    --bleu: #3D0C57;
+    --bleu-clair: #791BA5;
+    --violet: #791BA5;
+    --violet-fonce: #3D0C57;
+    --lavande: #F2E6F8;
+    --or: #d4a017;
+    --vert: #15803d;
+    --rouge: #b91c1c;
+    --gris-bg: #faf7fc;
+    --gris-bord: #e8dff0;
+    --blanc: #ffffff;
+    --texte: #1e293b;
+    --texte-clair: #64748b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--gris-bg); color: var(--texte); }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--violet-fonce) 0%, #2A0840 100%);
+    color: white; padding: 0;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .header-top { padding: 10px 24px; display: flex; align-items: center; gap: 16px; }
+  .header-logo {
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  }
+  .header-logo svg { height: 46px; width: auto; }
+  .header-logo .logo-divider {
+    width: 1px; height: 38px; background: rgba(242,230,248,0.3);
+  }
+  .header-top h1 { font-size: 1rem; font-weight: 700; line-height: 1.35; }
+  .header-top .badge {
+    background: var(--lavande); color: var(--violet-fonce); padding: 3px 10px;
+    border-radius: 20px; font-size: 0.72rem; font-weight: 700; white-space: nowrap;
+    margin-left: auto;
+  }
+
+  /* NAV */
+  nav { background: rgba(0,0,0,0.25); overflow-x: auto; white-space: nowrap; }
+  nav a {
+    display: inline-block; padding: 10px 16px; color: rgba(255,255,255,0.8);
+    text-decoration: none; font-size: 0.8rem; font-weight: 500;
+    border-bottom: 3px solid transparent; transition: all 0.2s;
+  }
+  nav a:hover, nav a.active { color: white; border-bottom-color: var(--lavande); background: rgba(255,255,255,0.12); }
+
+  /* SECTIONS */
+  section { display: none; padding: 28px 20px; max-width: 960px; margin: 0 auto; }
+  section.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: white; border-radius: 12px; padding: 22px 24px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08); margin-bottom: 20px;
+    border-left: 4px solid var(--bleu-clair);
+  }
+  .card h2 { font-size: 1.05rem; font-weight: 700; color: var(--bleu); margin-bottom: 12px; }
+  .card h3 { font-size: 0.95rem; font-weight: 600; color: var(--bleu); margin: 14px 0 8px; }
+  .card p, .card li { font-size: 0.88rem; line-height: 1.6; color: var(--texte); margin-bottom: 6px; }
+  .card ul { padding-left: 18px; }
+  .card.or { border-left-color: var(--or); }
+  .card.vert { border-left-color: var(--vert); }
+  .card.rouge { border-left-color: var(--rouge); }
+
+  /* SECTION HERO */
+  .hero {
+    background: linear-gradient(135deg, var(--violet-fonce), var(--violet));
+    color: white; border-radius: 14px; padding: 32px;
+    text-align: center; margin-bottom: 24px;
+  }
+  .hero .citation { font-size: 1.25rem; font-style: italic; margin-bottom: 10px; }
+  .hero .sub { font-size: 0.9rem; opacity: 0.85; }
+
+  /* PROGRAMME TABLE */
+  .table-wrapper { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th { background: var(--bleu); color: white; padding: 10px 12px; text-align: left; }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--gris-bord); }
+  tr:nth-child(even) td { background: #f8fafc; }
+  tr:hover td { background: #eff6ff; }
+
+  /* DIAGNOSTIC GRID */
+  .domaine-header {
+    background: var(--bleu); color: white; padding: 12px 18px;
+    border-radius: 10px 10px 0 0; font-weight: 700; font-size: 0.95rem;
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+  }
+  .domaine-header:hover { background: var(--bleu-clair); }
+  .domaine-body { display: none; background: white; border: 1px solid var(--gris-bord); border-top: none; border-radius: 0 0 10px 10px; margin-bottom: 14px; }
+  .domaine-body.open { display: block; }
+  .critere-row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 10px; padding: 10px 18px; border-bottom: 1px solid var(--gris-bord); }
+  .critere-row:last-child { border-bottom: none; }
+  .critere-text { font-size: 0.84rem; }
+  .stars { display: flex; gap: 4px; }
+  .stars button {
+    width: 30px; height: 30px; border: 2px solid var(--gris-bord);
+    border-radius: 6px; background: white; cursor: pointer;
+    font-size: 0.75rem; font-weight: 700; color: var(--texte-clair);
+    transition: all 0.15s;
+  }
+  .stars button.active { background: var(--or); border-color: var(--or); color: #1a1a1a; }
+  .stars button:hover { border-color: var(--or); }
+  .obs-input {
+    border: 1px solid var(--gris-bord); border-radius: 6px;
+    padding: 4px 8px; font-size: 0.78rem; width: 100%;
+    resize: none; height: 32px;
+  }
+  .critere-row { grid-template-columns: 1fr 140px 180px; }
+
+  /* SCORE */
+  .score-bar { background: var(--gris-bord); border-radius: 10px; height: 12px; overflow: hidden; margin-top: 6px; }
+  .score-fill { height: 100%; border-radius: 10px; transition: width 0.4s; background: linear-gradient(90deg, #ef4444, var(--or), var(--vert)); }
+  .domaine-score { font-size: 0.78rem; color: var(--texte-clair); margin-top: 4px; }
+
+  /* CHECKLIST */
+  .check-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 0; border-bottom: 1px solid var(--gris-bord); font-size: 0.84rem;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item input[type=checkbox] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--vert); }
+  .check-item label { flex: 1; cursor: pointer; }
+  .check-item select { font-size: 0.78rem; padding: 3px 6px; border: 1px solid var(--gris-bord); border-radius: 5px; }
+  .check-item.checked label { text-decoration: line-through; color: var(--texte-clair); }
+
+  /* PROMPTS */
+  .prompt-builder {
+    background: linear-gradient(135deg, #2A0840, var(--violet-fonce));
+    border-radius: 14px; padding: 26px; color: white; margin-bottom: 20px;
+  }
+  .prompt-builder h2 { color: var(--or); margin-bottom: 16px; font-size: 1.1rem; }
+  .pb-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 600px) { .pb-form { grid-template-columns: 1fr; } }
+  .pb-form label { font-size: 0.78rem; color: #94a3b8; display: block; margin-bottom: 4px; }
+  .pb-form select, .pb-form input, .pb-form textarea {
+    width: 100%; padding: 8px 10px; border-radius: 8px;
+    border: 1px solid #5a2a7a; background: #2A0840;
+    color: white; font-size: 0.82rem;
+  }
+  .pb-form .full { grid-column: 1 / -1; }
+  .pb-form textarea { height: 60px; resize: vertical; }
+  .prompt-output {
+    background: #200535; border-radius: 10px; padding: 16px;
+    font-size: 0.82rem; line-height: 1.7; color: #e2e8f0;
+    white-space: pre-wrap; min-height: 80px; border: 1px solid #5a2a7a;
+    margin-bottom: 12px;
+  }
+  .btn {
+    padding: 9px 20px; border-radius: 8px; border: none;
+    font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-or { background: var(--or); color: #1a1a1a; }
+  .btn-or:hover { background: #c49010; }
+  .btn-bleu { background: var(--violet); color: white; }
+  .btn-bleu:hover { background: var(--violet-fonce); }
+  .btn-vert { background: var(--vert); color: white; }
+  .btn-vert:hover { background: #166534; }
+  .btn-gris { background: #64748b; color: white; }
+  .btn-gris:hover { background: #475569; }
+  .btns { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* PROMPT CARDS */
+  .prompt-card {
+    background: white; border-radius: 10px; padding: 18px;
+    margin-bottom: 14px; border-left: 4px solid var(--bleu-clair);
+  }
+  .prompt-card h3 { font-size: 0.9rem; font-weight: 700; color: var(--bleu); margin-bottom: 10px; }
+  .prompt-card pre {
+    background: #f1f5f9; border-radius: 8px; padding: 14px;
+    font-size: 0.78rem; line-height: 1.6; white-space: pre-wrap;
+    color: var(--texte); border: 1px solid var(--gris-bord);
+  }
+  .copy-btn {
+    margin-top: 8px; padding: 5px 14px; border-radius: 6px;
+    background: var(--bleu); color: white; border: none;
+    font-size: 0.75rem; cursor: pointer; font-weight: 600;
+  }
+  .copy-btn:hover { background: var(--bleu-clair); }
+  .copy-btn.copied { background: var(--vert); }
+
+  /* AI TOOLS */
+  .ai-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .ai-card {
+    background: white; border-radius: 10px; padding: 16px;
+    text-align: center; box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    text-decoration: none; color: var(--texte); transition: all 0.2s;
+    border: 2px solid transparent;
+  }
+  .ai-card:hover { border-color: var(--violet); transform: translateY(-2px); box-shadow: 0 4px 14px rgba(121,27,165,0.18); }
+  .ai-card .icon { font-size: 2rem; margin-bottom: 8px; }
+  .ai-card .name { font-weight: 700; font-size: 0.88rem; }
+  .ai-card .desc { font-size: 0.72rem; color: var(--texte-clair); margin-top: 3px; }
+
+  /* ASSISTANTS */
+  .assistant-card {
+    background: white; border-radius: 12px; padding: 22px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 14px;
+    display: flex; gap: 18px; align-items: flex-start;
+    border: 1px solid var(--gris-bord); text-decoration: none;
+    color: var(--texte); transition: all 0.2s;
+  }
+  .assistant-card:hover { border-color: var(--violet); box-shadow: 0 4px 18px rgba(121,27,165,0.2); }
+  .assistant-card .icon { font-size: 2.4rem; }
+  .assistant-card .info h3 { font-size: 1rem; font-weight: 700; color: var(--bleu); margin-bottom: 5px; }
+  .assistant-card .info p { font-size: 0.82rem; color: var(--texte-clair); line-height: 1.5; }
+  .assistant-card .badge-ext {
+    margin-left: auto; background: var(--lavande); color: var(--violet);
+    padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;
+    white-space: nowrap; align-self: flex-start;
+  }
+
+  /* RESSOURCES */
+  .ressource-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; background: white; border-radius: 9px;
+    margin-bottom: 8px; text-decoration: none; color: var(--texte);
+    border: 1px solid var(--gris-bord); transition: all 0.2s;
+    font-size: 0.85rem;
+  }
+  .ressource-link:hover { border-color: var(--violet); color: var(--violet); }
+  .ressource-link .rl-icon { font-size: 1.1rem; }
+  .ressource-link .rl-text { flex: 1; }
+  .ressource-link .rl-text strong { display: block; font-size: 0.85rem; }
+  .ressource-link .rl-text span { font-size: 0.75rem; color: var(--texte-clair); }
+  .rl-ext { font-size: 0.7rem; color: var(--violet); }
+
+  /* DOWNLOAD BANNER */
+  .download-banner {
+    background: linear-gradient(135deg, var(--violet-fonce), var(--violet));
+    border-radius: 12px; padding: 22px 26px;
+    display: flex; align-items: center; gap: 18px;
+    text-decoration: none; color: white; margin-bottom: 20px;
+    transition: opacity 0.2s;
+  }
+  .download-banner:hover { opacity: 0.9; }
+  .download-banner .dl-icon { font-size: 2.6rem; }
+  .download-banner .dl-text h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+  .download-banner .dl-text p { font-size: 0.82rem; opacity: 0.85; }
+  .download-banner .dl-btn {
+    margin-left: auto; background: var(--or); color: #1a1a1a;
+    padding: 8px 18px; border-radius: 8px; font-weight: 700; font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  /* ENGAGEMENTS */
+  .engagement-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+  .engagement-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--bleu); color: white; display: flex;
+    align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .engagement-input {
+    flex: 1; border: 1px solid var(--gris-bord); border-radius: 8px;
+    padding: 8px 12px; font-size: 0.85rem;
+  }
+  .engagement-date {
+    border: 1px solid var(--gris-bord); border-radius: 8px;
+    padding: 8px 10px; font-size: 0.82rem; width: 130px;
+  }
+
+  /* PLAN ACTION */
+  .plan-table td input {
+    width: 100%; border: none; padding: 6px 8px;
+    font-size: 0.8rem; background: transparent;
+  }
+  .plan-table td { vertical-align: middle; }
+  .plan-table th { font-size: 0.78rem; }
+
+  /* SYNTHESE */
+  .synthese-box {
+    background: var(--lavande); border: 1px solid #d4b0e8; border-radius: 10px;
+    padding: 16px 20px; margin-bottom: 16px;
+  }
+  .synthese-box h3 { color: var(--violet-fonce); font-size: 0.9rem; margin-bottom: 8px; }
+  .synthese-box textarea {
+    width: 100%; border: 1px solid #d4b0e8; border-radius: 8px;
+    padding: 8px; font-size: 0.82rem; resize: vertical; min-height: 60px;
+    background: white;
+  }
+
+  /* MATURITE */
+  .maturite-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 0; }
+  .mg-head { background: var(--bleu); color: white; padding: 8px 10px; font-size: 0.75rem; font-weight: 700; }
+  .mg-cell { padding: 8px 10px; font-size: 0.75rem; border-bottom: 1px solid var(--gris-bord); border-right: 1px solid var(--gris-bord); line-height: 1.4; }
+  .mg-cell.n1 { background: #fef2f2; }
+  .mg-cell.n2 { background: #fffbeb; }
+  .mg-cell.n3 { background: #f0fdf4; }
+  .mg-cell.n4 { background: #f0e0fa; }
+  .mg-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 0.7rem; font-weight: 700; margin-bottom: 4px;
+  }
+  .n1-badge { background: #fee2e2; color: #991b1b; }
+  .n2-badge { background: #fef3c7; color: #92400e; }
+  .n3-badge { background: #d1fae5; color: #065f46; }
+  .n4-badge { background: var(--lavande); color: var(--violet-fonce); }
+
+  /* PROGRESS */
+  .progress-global {
+    background: white; border-radius: 12px; padding: 20px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08); margin-bottom: 20px;
+  }
+  .progress-global h3 { font-size: 0.9rem; color: var(--bleu); margin-bottom: 14px; font-weight: 700; }
+  .radar-container { display: flex; flex-wrap: wrap; gap: 10px; }
+  .radar-item { flex: 1; min-width: 180px; }
+  .radar-label { font-size: 0.72rem; color: var(--texte-clair); margin-bottom: 4px; }
+  .radar-bar { background: var(--gris-bord); border-radius: 6px; height: 8px; }
+  .radar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #ef4444, var(--or), var(--vert)); transition: width 0.5s; }
+  .radar-score { font-size: 0.7rem; color: var(--texte-clair); text-align: right; }
+
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--vert); color: white; padding: 10px 18px;
+    border-radius: 10px; font-size: 0.85rem; font-weight: 600;
+    opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 9999;
+  }
+  #toast.show { opacity: 1; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 7px 14px; border-radius: 8px; border: 2px solid var(--gris-bord);
+    background: white; font-size: 0.8rem; cursor: pointer; font-weight: 500;
+    transition: all 0.15s;
+  }
+  .tab-btn.active { background: var(--violet); color: white; border-color: var(--violet); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; margin-right: 4px; }
+  .tag-bleu { background: var(--lavande); color: var(--violet-fonce); }
+  .tag-vert { background: #d1fae5; color: #065f46; }
+  .tag-or { background: #fef3c7; color: #92400e; }
+
+  @media (max-width: 640px) {
+    .critere-row { grid-template-columns: 1fr; }
+    .assistant-card { flex-direction: column; }
+    .download-banner { flex-direction: column; text-align: center; }
+    .download-banner .dl-btn { margin: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="header-logo">
+      <!-- Logo Sophiae -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 46" fill="none" aria-label="Sophiae">
+        <text x="0" y="21" font-family="'Segoe UI', system-ui, sans-serif" font-size="16" font-weight="800" fill="#F2E6F8" letter-spacing="1">SOPHIAE</text>
+        <text x="0" y="37" font-family="'Segoe UI', system-ui, sans-serif" font-size="9.5" font-weight="400" fill="#d4b0e8" letter-spacing="2">FORMATION</text>
+      </svg>
+      <div class="logo-divider"></div>
+    </div>
+    <h1>Auto-évaluation d'établissement</h1>
+    <div class="badge">Enseignement catholique</div>
+  </div>
+  <nav id="mainNav">
+    <a href="#" onclick="showSection('accueil')" class="active">🏠 Accueil</a>
+    <a href="#" onclick="showSection('programme')">📅 Programme</a>
+    <a href="#" onclick="showSection('diagnostic')">📊 Auto-diagnostic</a>
+    <a href="#" onclick="showSection('checklist')">✅ Check-list</a>
+    <a href="#" onclick="showSection('maturite')">📏 Maturité</a>
+    <a href="#" onclick="showSection('ateliers')">🚀 Ateliers</a>
+    <a href="#" onclick="showSection('ia')">🤖 IA & Prompts</a>
+    <a href="#" onclick="showSection('assistants')">💬 Assistants</a>
+    <a href="#" onclick="showSection('ressources')">📚 Ressources</a>
+    <a href="#" onclick="showSection('engagements')">✍️ Engagements</a>
+  </nav>
+</header>
+
+<!-- ==================== ACCUEIL ==================== -->
+<section id="accueil" class="active">
+  <div class="hero">
+    <div class="citation">« L'évaluation n'est pas un bilan, c'est un tremplin. »</div>
+    <div class="sub">Formation à l'auto-évaluation d'établissement — Chefs d'établissement de l'Enseignement catholique</div>
+  </div>
+
+  <a href="https://cneap365-my.sharepoint.com/:f:/g/personal/bruno_terrasson_cneap_fr/IgCSVm5HAsOmRpGgnW3Ny8w6AdWIIReah_FYmVP54LAaE3U?e=GpqW4B" target="_blank" class="download-banner">
+    <div class="dl-icon">📥</div>
+    <div class="dl-text">
+      <h3>Télécharger le support PDF de la formation</h3>
+      <p>Dossier complet — Dossier_Formation_Autoevaluation_Sophiae</p>
+    </div>
+    <div class="dl-btn">⬇ Télécharger</div>
+  </a>
+
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:20px;">
+    <div class="card">
+      <h2>🎯 Objectifs</h2>
+      <ul>
+        <li>Situer l'évaluation dans le cadre législatif</li>
+        <li>Distinguer auto-évaluation et évaluation externe</li>
+        <li>Initier son propre diagnostic d'établissement</li>
+        <li>Construire des axes d'amélioration</li>
+        <li>Utiliser l'IA comme outil de pilotage</li>
+      </ul>
+    </div>
+    <div class="card or">
+      <h2>🧭 Compétences visées</h2>
+      <ul>
+        <li>Pilotage stratégique et conduite du changement</li>
+        <li>Animation et gouvernance de la communauté éducative</li>
+        <li>Culture de l'évaluation et amélioration continue</li>
+        <li>Maîtrise des données et outils numériques</li>
+        <li>Communication institutionnelle</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card vert">
+    <h2>🗺️ Navigation dans l'application</h2>
+    <p>Utilisez les onglets en haut pour naviguer entre les modules de la formation :</p>
+    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap:8px; margin-top:12px;">
+      <div onclick="showSection('programme')" style="cursor:pointer; padding:10px; background:#f0fdf4; border-radius:8px; font-size:0.82rem;">📅 <strong>Programme</strong> — déroulé de la journée</div>
+      <div onclick="showSection('diagnostic')" style="cursor:pointer; padding:10px; background:#eff6ff; border-radius:8px; font-size:0.82rem;">📊 <strong>Auto-diagnostic</strong> — 8 domaines interactifs</div>
+      <div onclick="showSection('checklist')" style="cursor:pointer; padding:10px; background:#fefce8; border-radius:8px; font-size:0.82rem;">✅ <strong>Check-list</strong> — préparation évaluation</div>
+      <div onclick="showSection('maturite')" style="cursor:pointer; padding:10px; background:#fdf4ff; border-radius:8px; font-size:0.82rem;">📏 <strong>Maturité</strong> — grille par niveaux</div>
+      <div onclick="showSection('ateliers')" style="cursor:pointer; padding:10px; background:#fff1f2; border-radius:8px; font-size:0.82rem;">🚀 <strong>Ateliers</strong> — exercices pratiques</div>
+      <div onclick="showSection('ia')" style="cursor:pointer; padding:10px; background:#f0f9ff; border-radius:8px; font-size:0.82rem;">🤖 <strong>IA & Prompts</strong> — générateur actif</div>
+      <div onclick="showSection('assistants')" style="cursor:pointer; padding:10px; background:#fdf4ff; border-radius:8px; font-size:0.82rem;">💬 <strong>Assistants IA</strong> — DDEC & CE</div>
+      <div onclick="showSection('ressources')" style="cursor:pointer; padding:10px; background:#f0fdf4; border-radius:8px; font-size:0.82rem;">📚 <strong>Ressources</strong> — textes et liens</div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== PROGRAMME ==================== -->
+<section id="programme">
+  <div class="card">
+    <h2>🕐 Programme de la journée</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Horaire</th><th>Thème</th><th>Contenu</th></tr></thead>
+        <tbody>
+          <tr><td><strong>8h30 – 9h00</strong></td><td>🤝 Accueil</td><td>Tour de table, attentes, présentation de la journée</td></tr>
+          <tr><td><strong>9h00 – 10h30</strong></td><td>📜 Cadre réglementaire</td><td>Évaluation des établissements : textes, enjeux, rôle du CEE</td></tr>
+          <tr><td><strong>10h30 – 10h45</strong></td><td>☕ Pause</td><td>—</td></tr>
+          <tr><td><strong>10h45 – 12h15</strong></td><td>🔍 Logique d'auto-évaluation + Atelier 1</td><td>Méthode, référentiels, analyse d'un établissement fictif</td></tr>
+          <tr><td><strong>12h15 – 13h30</strong></td><td>🍽️ Déjeuner</td><td>—</td></tr>
+          <tr><td><strong>13h30 – 15h00</strong></td><td>🏫 Construire son auto-évaluation + Atelier 2</td><td>Travail sur son propre établissement</td></tr>
+          <tr><td><strong>15h00 – 15h15</strong></td><td>☕ Pause</td><td>—</td></tr>
+          <tr><td><strong>15h15 – 16h30</strong></td><td>🤖 IA, plan d'amélioration + Atelier 3</td><td>Usages de l'IA, construction d'axes de progrès</td></tr>
+          <tr><td><strong>16h30 – 17h00</strong></td><td>🎯 Synthèse et clôture</td><td>Engagements individuels, ressources, évaluation de la formation</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card or">
+    <h2>📌 Les 3 modules clés</h2>
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
+      <div style="background:#fff7ed; padding:14px; border-radius:10px;">
+        <div style="font-weight:700; color:#92400e; margin-bottom:6px;">MODULE 1</div>
+        <div style="font-size:0.82rem;">Cadre réglementaire — Loi 2019, CEE, établissements privés sous contrat</div>
+      </div>
+      <div style="background:#f0fdf4; padding:14px; border-radius:10px;">
+        <div style="font-weight:700; color:#065f46; margin-bottom:6px;">MODULE 2</div>
+        <div style="font-size:0.82rem;">Démarche d'auto-évaluation — méthode, étapes, cycle PDCA</div>
+      </div>
+      <div style="background:#eff6ff; padding:14px; border-radius:10px;">
+        <div style="font-weight:700; color:#1e40af; margin-bottom:6px;">MODULE 3</div>
+        <div style="font-size:0.82rem;">Spécificités de l'EC — caractère propre, 4 piliers</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>🔄 Cycle d'amélioration continue</h2>
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:10px; text-align:center;">
+      <div style="background:#eff6ff; padding:14px; border-radius:10px;">
+        <div style="font-size:1.5rem;">📋</div>
+        <div style="font-weight:700; color:var(--bleu); font-size:0.85rem; margin-top:6px;">PLANIFIER</div>
+        <div style="font-size:0.75rem; color:var(--texte-clair); margin-top:4px;">Définir les priorités, construire le projet</div>
+      </div>
+      <div style="background:#f0fdf4; padding:14px; border-radius:10px;">
+        <div style="font-size:1.5rem;">🚀</div>
+        <div style="font-weight:700; color:var(--vert); font-size:0.85rem; margin-top:6px;">DÉPLOYER</div>
+        <div style="font-size:0.75rem; color:var(--texte-clair); margin-top:4px;">Mettre en œuvre les actions prévues</div>
+      </div>
+      <div style="background:#fefce8; padding:14px; border-radius:10px;">
+        <div style="font-size:1.5rem;">📊</div>
+        <div style="font-weight:700; color:#92400e; font-size:0.85rem; margin-top:6px;">ÉVALUER</div>
+        <div style="font-size:0.75rem; color:var(--texte-clair); margin-top:4px;">Mesurer les effets, analyser les données</div>
+      </div>
+      <div style="background:#fdf4ff; padding:14px; border-radius:10px;">
+        <div style="font-size:1.5rem;">🔁</div>
+        <div style="font-weight:700; color:#6b21a8; font-size:0.85rem; margin-top:6px;">AJUSTER</div>
+        <div style="font-size:0.75rem; color:var(--texte-clair); margin-top:4px;">Corriger, améliorer, relancer le cycle</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== DIAGNOSTIC ==================== -->
+<section id="diagnostic">
+  <div class="progress-global">
+    <h3>📊 Progression globale du diagnostic</h3>
+    <div class="radar-container" id="radarContainer"></div>
+    <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="btn btn-bleu" onclick="exportDiagnostic()">📤 Exporter mon diagnostic</button>
+      <button class="btn btn-or" onclick="genererPromptDiag()">🤖 Générer un prompt IA depuis mon diagnostic</button>
+      <button class="btn btn-gris" onclick="resetDiagnostic()">🔄 Réinitialiser</button>
+    </div>
+  </div>
+
+  <p style="font-size:0.82rem; color:var(--texte-clair); margin-bottom:14px;">
+    ⚠️ Pour chaque critère, attribuez un niveau de 1 (insuffisant) à 4 (exemplaire). Cliquez sur un domaine pour le déployer.
+  </p>
+
+  <div id="domainesContainer"></div>
+
+  <div class="card" style="margin-top:20px;">
+    <h2>📊 Synthèse du diagnostic</h2>
+    <div class="synthese-box">
+      <h3>💪 Nos 3 principales forces</h3>
+      <textarea id="synth-forces" placeholder="Décrivez vos 3 points forts..."></textarea>
+    </div>
+    <div class="synthese-box" style="background:#fef2f2; border-color:#fecaca;">
+      <h3 style="color:#991b1b;">🎯 Nos 3 axes d'amélioration</h3>
+      <textarea id="synth-axes" placeholder="Décrivez vos 3 axes d'amélioration..."></textarea>
+    </div>
+    <div class="synthese-box" style="background:#f0fdf4; border-color:#bbf7d0;">
+      <h3 style="color:#065f46;">🚀 Notre priorité pour l'année</h3>
+      <textarea id="synth-priorite" placeholder="Quelle est votre priorité d'action ?"></textarea>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== CHECKLIST ==================== -->
+<section id="checklist">
+  <div class="card">
+    <h2>📂 A — Documents institutionnels</h2>
+    <div id="checklist-docs"></div>
+  </div>
+  <div class="card">
+    <h2>📊 B — Données et indicateurs</h2>
+    <div id="checklist-data"></div>
+  </div>
+  <div class="card">
+    <h2>👥 C — Pratiques de pilotage et implication de la communauté</h2>
+    <div id="checklist-pratiques"></div>
+  </div>
+  <div style="text-align:right; margin-top:10px;">
+    <button class="btn btn-bleu" onclick="exportChecklist()">📤 Exporter la check-list</button>
+  </div>
+</section>
+
+<!-- ==================== MATURITE ==================== -->
+<section id="maturite">
+  <div class="card">
+    <h2>📏 Les 4 niveaux de maturité institutionnelle</h2>
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:10px; margin-bottom:20px;">
+      <div style="background:#fef2f2; padding:12px; border-radius:9px; text-align:center;">
+        <div class="mg-badge n1-badge">Niveau 1</div>
+        <div style="font-weight:700; font-size:0.85rem; margin:4px 0;">INITIAL</div>
+        <div style="font-size:0.75rem; color:var(--texte-clair);">Pratiques peu formalisées, dépendantes des personnes, non évaluées</div>
+      </div>
+      <div style="background:#fffbeb; padding:12px; border-radius:9px; text-align:center;">
+        <div class="mg-badge n2-badge">Niveau 2</div>
+        <div style="font-weight:700; font-size:0.85rem; margin:4px 0;">EN DÉVELOPPEMENT</div>
+        <div style="font-size:0.75rem; color:var(--texte-clair);">Premières formalisations, démarche engagée mais incomplète</div>
+      </div>
+      <div style="background:#f0fdf4; padding:12px; border-radius:9px; text-align:center;">
+        <div class="mg-badge n3-badge">Niveau 3</div>
+        <div style="font-weight:700; font-size:0.85rem; margin:4px 0;">OPÉRATIONNEL</div>
+        <div style="font-size:0.75rem; color:var(--texte-clair);">Pratiques établies, évaluées régulièrement, partagées</div>
+      </div>
+      <div style="background:#eff6ff; padding:12px; border-radius:9px; text-align:center;">
+        <div class="mg-badge n4-badge">Niveau 4</div>
+        <div style="font-weight:700; font-size:0.85rem; margin:4px 0;">EXEMPLAIRE</div>
+        <div style="font-size:0.75rem; color:var(--texte-clair);">Excellence institutionnalisée, source d'inspiration, en amélioration continue</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🏛️ Domaine A — Leadership et gouvernance</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Critère</th><th>Niveau 1</th><th>Niveau 2</th><th>Niveau 3</th><th>Niveau 4</th></tr></thead>
+        <tbody>
+          <tr><td>Vision stratégique</td><td class="n1-badge" style="font-size:0.75rem;">Absente ou non formalisée</td><td>Formalisée mais peu partagée</td><td>Connue et mobilisatrice</td><td class="n4-badge" style="font-size:0.75rem;">Partagée, vivante, révisée annuellement</td></tr>
+          <tr><td>Décisions collectives</td><td>Centralisées sur la direction</td><td>Partiellement collectives</td><td>Instances fonctionnelles</td><td>Culture de codécision établie</td></tr>
+          <tr><td>Pilotage par les données</td><td>Rare ou absent</td><td>Données collectées peu utilisées</td><td>Indicateurs suivis et communiqués</td><td>Tableau de bord dynamique</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📚 Domaine B — Pilotage pédagogique</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Critère</th><th>Niveau 1</th><th>Niveau 2</th><th>Niveau 3</th><th>Niveau 4</th></tr></thead>
+        <tbody>
+          <tr><td>Projet pédagogique</td><td>Inexistant</td><td>En cours d'élaboration</td><td>Formalisé et mis en œuvre</td><td>Innovant, évalué, reconnu</td></tr>
+          <tr><td>Innovation pédagogique</td><td>Individuelle, non soutenue</td><td>Reconnue mais non systématique</td><td>Encouragée et accompagnée</td><td>Culture d'innovation collective</td></tr>
+          <tr><td>Travail collaboratif</td><td>Inexistant</td><td>Informel entre quelques collègues</td><td>Formalisé en équipes</td><td>Communautés professionnelles actives</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎓 Domaine C — Réussite des élèves</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Critère</th><th>Niveau 1</th><th>Niveau 2</th><th>Niveau 3</th><th>Niveau 4</th></tr></thead>
+        <tbody>
+          <tr><td>Suivi des résultats</td><td>Ponctuel, non analysé</td><td>Analysé sans action systématique</td><td>Suivi régulier avec remédiation</td><td>Suivi individualisé, culture réussite</td></tr>
+          <tr><td>Inclusion scolaire</td><td>Non traitée</td><td>Partiellement prise en charge</td><td>Dispositifs établis et suivis</td><td>Établissement inclusif reconnu</td></tr>
+          <tr><td>Orientation</td><td>Peu anticipée</td><td>Information en fin de cycle</td><td>Accompagnement structuré</td><td>Conseil personnalisé tout au long</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>✝️ Domaine D — Projet éducatif et caractère propre</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Critère</th><th>Niveau 1</th><th>Niveau 2</th><th>Niveau 3</th><th>Niveau 4</th></tr></thead>
+        <tbody>
+          <tr><td>Projet éducatif</td><td>Non formalisé</td><td>Rédigé mais peu vivant</td><td>Connu et décliné en actions</td><td>Projet communautaire réévalué</td></tr>
+          <tr><td>Proposition pastorale</td><td>Absente ou confidentielle</td><td>Existante mais peu proposée</td><td>Intégrée à la vie de l'établissement</td><td>Expérience spirituelle offerte à tous</td></tr>
+          <tr><td>Solidarité et engagement</td><td>Actions ponctuelles</td><td>Actions régulières non coordonnées</td><td>Programme structuré</td><td>Culture de l'engagement, projets territoire</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== ATELIERS ==================== -->
+<section id="ateliers">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('atelier1', this)">🔍 Atelier 1</button>
+    <button class="tab-btn" onclick="showTab('atelier2', this)">🏫 Atelier 2</button>
+    <button class="tab-btn" onclick="showTab('atelier3', this)">📋 Atelier 3</button>
+  </div>
+
+  <div id="atelier1" class="tab-content active">
+    <div class="card">
+      <h2>🔍 ATELIER 1 — Analyse d'un établissement fictif (50 min)</h2>
+      <p style="margin-bottom:12px;">Collège Saint-Joseph de Montcerisier — 480 élèves, 4 classes par niveau, 2nd degré</p>
+      <div style="background:#fef3c7; border-radius:8px; padding:12px; font-size:0.82rem; margin-bottom:14px;">
+        ⚠️ <strong>Consignes :</strong> Sous-groupes de 4 à 5 participants — 35 min de travail + 15 min de restitution
+      </div>
+      <h3>📄 Données de l'établissement fictif</h3>
+
+      <!-- IDENTITÉ -->
+      <div style="background:var(--lavande); border-radius:10px; padding:16px 20px; margin-bottom:14px;">
+        <div style="font-weight:700; font-size:0.95rem; color:var(--violet-fonce); margin-bottom:10px;">🏫 Collège Saint-Joseph de Montcerisier — Présentation générale</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:0.82rem;">
+          <div><strong>Type :</strong> Collège catholique sous contrat d'association</div>
+          <div><strong>Localisation :</strong> Montcerisier (ville moyenne, 28 000 hab., Seine-et-Marne)</div>
+          <div><strong>Effectifs :</strong> 480 élèves — 4 classes par niveau (6e à 3e)</div>
+          <div><strong>Personnel :</strong> 38 enseignants, 12 personnels OGEC, 1 chef d'étab., 1 adjointe</div>
+          <div><strong>Chef d'établissement :</strong> M. Bernard Lefèvre (en poste depuis 3 ans)</div>
+          <div><strong>Tutelle :</strong> DDEC 77 — Diocèse de Meaux</div>
+          <div><strong>Projet d'établissement :</strong> 2022–2026 — axe central : "Apprendre ensemble, grandir en humanité"</div>
+          <div><strong>Dernière évaluation externe CEE :</strong> Prévue au printemps 2026</div>
+        </div>
+      </div>
+
+      <!-- RÉSULTATS ACADÉMIQUES -->
+      <div style="background:white; border:1px solid var(--gris-bord); border-radius:10px; padding:16px 20px; margin-bottom:14px;">
+        <div style="font-weight:700; font-size:0.9rem; color:var(--violet-fonce); margin-bottom:10px;">📊 Résultats académiques et indicateurs clés</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; font-size:0.82rem; margin-bottom:12px;">
+          <div style="background:#f0fdf4; border-radius:8px; padding:10px; text-align:center;">
+            <div style="font-size:1.4rem; font-weight:800; color:#15803d;">74 %</div>
+            <div style="font-size:0.72rem; color:#64748b;">Taux de réussite au Brevet (DNB)</div>
+            <div style="font-size:0.7rem; color:#64748b;">National EC : 87 % — Académie : 82 %</div>
+          </div>
+          <div style="background:#fef3c7; border-radius:8px; padding:10px; text-align:center;">
+            <div style="font-size:1.4rem; font-weight:800; color:#92400e;">+0,8</div>
+            <div style="font-size:0.72rem; color:#64748b;">Valeur ajoutée (IVAC)</div>
+            <div style="font-size:0.7rem; color:#64748b;">Légèrement supérieure à l'attendu</div>
+          </div>
+          <div style="background:#fef2f2; border-radius:8px; padding:10px; text-align:center;">
+            <div style="font-size:1.4rem; font-weight:800; color:#b91c1c;">9,2 %</div>
+            <div style="font-size:0.72rem; color:#64748b;">Taux d'absentéisme élèves</div>
+            <div style="font-size:0.7rem; color:#64748b;">En hausse de +1,8 pt sur 2 ans</div>
+          </div>
+        </div>
+        <div style="font-size:0.82rem; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div>📈 <strong>Orientation 2de générale :</strong> 68 % (stable)</div>
+          <div>📉 <strong>Décrochage scolaire :</strong> 4 élèves signalés en 2024-25</div>
+          <div>📚 <strong>Élèves à besoins particuliers (ULIS) :</strong> 12 élèves, 1 AESH partagée</div>
+          <div>🌍 <strong>Élèves allophones :</strong> 6 % de l'effectif (+3 % en 3 ans)</div>
+        </div>
+      </div>
+
+      <!-- VIE DE L'ÉTABLISSEMENT -->
+      <div style="background:white; border:1px solid var(--gris-bord); border-radius:10px; padding:16px 20px; margin-bottom:14px;">
+        <div style="font-weight:700; font-size:0.9rem; color:var(--violet-fonce); margin-bottom:10px;">🌱 Vie scolaire, pastorale et projets</div>
+        <div style="font-size:0.82rem; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div>✝️ <strong>Pastorale :</strong> Animatrice pastorale à mi-temps, retraites de 3e, temps forts liturgiques. Participation en baisse chez les familles non-pratiquantes (55 % des inscrits).</div>
+          <div>🎭 <strong>Projets culturels :</strong> Chorale primée au concours diocésain, projet théâtre inter-classes en cours. Section sportive basket (partenariat avec club local).</div>
+          <div>💻 <strong>Numérique :</strong> 1 salle informatique (équipements vieillissants, 2018), 60 % des enseignants utilisent un ENT, déploiement tablettes en attente de financement OGEC.</div>
+          <div>🤝 <strong>Partenariats :</strong> Conventions avec 3 collèges publics voisins, partenariat Université Paris-Est Créteil pour tutorat 3e. Réseau APE actif (120 familles adhérentes).</div>
+        </div>
+      </div>
+
+      <!-- ENQUÊTE DE SATISFACTION -->
+      <div style="background:white; border:1px solid var(--gris-bord); border-radius:10px; padding:16px 20px; margin-bottom:14px;">
+        <div style="font-weight:700; font-size:0.9rem; color:var(--violet-fonce); margin-bottom:10px;">📋 Enquête de satisfaction 2024-25 (255 réponses familles / 210 élèves)</div>
+        <div style="font-size:0.81rem;">
+          <div style="display:grid; grid-template-columns:2fr 1fr; gap:4px; margin-bottom:4px; font-weight:600; color:var(--texte-clair);">
+            <span>Indicateur</span><span style="text-align:center;">Score</span>
+          </div>
+          <div style="display:grid; grid-template-columns:2fr 1fr; gap:4px; padding:6px 0; border-bottom:1px solid var(--gris-bord);">
+            <span>Qualité de l'enseignement (familles)</span>
+            <span style="text-align:center; background:#d1fae5; border-radius:4px; padding:1px 6px; font-weight:700; color:#065f46;">78 %</span>
+          </div>
+          <div style="display:grid; grid-template-columns:2fr 1fr; gap:4px; padding:6px 0; border-bottom:1px solid var(--gris-bord);">
+            <span>Ambiance et relations entre élèves (élèves)</span>
+            <span style="text-align:center; background:#fef3c7; border-radius:4px; padding:1px 6px; font-weight:700; color:#92400e;">61 %</span>
+          </div>
+          <div style="display:grid; grid-template-columns:2fr 1fr; gap:4px; padding:6px 0; border-bottom:1px solid var(--gris-bord);">
+            <span>Communication de l'établissement (familles)</span>
+            <span style="text-align:center; background:#fef3c7; border-radius:4px; padding:1px 6px; font-weight:700; color:#92400e;">57 %</span>
+          </div>
+          <div style="display:grid; grid-template-columns:2fr 1fr; gap:4px; padding:6px 0; border-bottom:1px solid var(--gris-bord);">
+            <span>Sentiment de sécurité (élèves)</span>
+            <span style="text-align:center; background:#fef2f2; border-radius:4px; padding:1px 6px; font-weight:700; color:#b91c1c;">48 %</span>
+          </div>
+          <div style="display:grid; grid-template-columns:2fr 1fr; gap:4px; padding:6px 0; border-bottom:1px solid var(--gris-bord);">
+            <span>Accompagnement à l'orientation (familles)</span>
+            <span style="text-align:center; background:#fef3c7; border-radius:4px; padding:1px 6px; font-weight:700; color:#92400e;">63 %</span>
+          </div>
+          <div style="display:grid; grid-template-columns:2fr 1fr; gap:4px; padding:6px 0;">
+            <span>Identité catholique vécue (familles)</span>
+            <span style="text-align:center; background:#d1fae5; border-radius:4px; padding:1px 6px; font-weight:700; color:#065f46;">71 %</span>
+          </div>
+        </div>
+        <div style="margin-top:10px; font-size:0.78rem; color:var(--texte-clair); font-style:italic;">
+          💬 Verbatim familles : <em>"On aimerait mieux connaître les projets en cours"</em> — <em>"Les problèmes de harcèlement ne sont pas assez pris en charge"</em> — <em>"Excellents enseignants, très investis"</em>
+        </div>
+      </div>
+
+      <!-- ENJEUX -->
+      <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:10px; padding:14px 18px; margin-bottom:16px; font-size:0.82rem;">
+        <div style="font-weight:700; margin-bottom:8px; color:#b91c1c;">⚠️ Enjeux identifiés par la direction (auto-déclarés)</div>
+        <ul style="padding-left:16px; margin:0; line-height:1.8;">
+          <li>Climat scolaire fragilisé : 3 situations de harcèlement traitées en 2024-25, besoin d'un programme structuré</li>
+          <li>Hétérogénéité croissante des élèves : besoins pédagogiques différenciés non couverts faute de formation enseignants</li>
+          <li>Transition numérique en retard : budget OGEC contraint, pas de plan de formation des enseignants au numérique</li>
+          <li>Communication famille-école insuffisante : pas de stratégie claire, utilisation disparate des outils (Pronote, mail, ENT)</li>
+          <li>Succession à préparer : la CPE part à la retraite en juin 2026, poste non encore pourvu</li>
+        </ul>
+      </div>
+
+      <div style="margin-top:12px;">
+        <label style="font-size:0.8rem; font-weight:600;">Forces identifiées :</label>
+        <textarea style="width:100%; border:1px solid var(--gris-bord); border-radius:8px; padding:8px; font-size:0.82rem; margin-top:4px; resize:vertical; min-height:60px;" placeholder="Listez les forces de cet établissement..."></textarea>
+      </div>
+      <div style="margin-top:10px;">
+        <label style="font-size:0.8rem; font-weight:600;">Axes d'amélioration :</label>
+        <textarea style="width:100%; border:1px solid var(--gris-bord); border-radius:8px; padding:8px; font-size:0.82rem; margin-top:4px; resize:vertical; min-height:60px;" placeholder="Identifiez les axes d'amélioration..."></textarea>
+      </div>
+      <div style="margin-top:10px;">
+        <label style="font-size:0.8rem; font-weight:600;">Questions à poser :</label>
+        <textarea style="width:100%; border:1px solid var(--gris-bord); border-radius:8px; padding:8px; font-size:0.82rem; margin-top:4px; resize:vertical; min-height:60px;" placeholder="Quelles informations complémentaires demanderiez-vous ?"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div id="atelier2" class="tab-content">
+    <div class="card">
+      <h2>🏫 ATELIER 2 — Auto-évaluation de mon établissement (70 min)</h2>
+      <div style="background:#fef3c7; border-radius:8px; padding:12px; font-size:0.82rem; margin-bottom:14px;">
+        ⚠️ <strong>Consignes :</strong> Phase individuelle (30 min) → remplir l'auto-diagnostic dans l'onglet 📊. Phase collective : partage et retours.
+      </div>
+      <p style="font-size:0.85rem; margin-bottom:12px;">Rendez-vous dans l'onglet <strong>📊 Auto-diagnostic</strong> pour remplir les 8 domaines, puis revenez ici pour la synthèse.</p>
+      <button class="btn btn-bleu" onclick="showSection('diagnostic')">→ Aller à l'auto-diagnostic</button>
+    </div>
+  </div>
+
+  <div id="atelier3" class="tab-content">
+    <div class="card">
+      <h2>📋 ATELIER 3 — Tableau de plan d'action (45 min)</h2>
+      <div style="background:#fef3c7; border-radius:8px; padding:12px; font-size:0.82rem; margin-bottom:14px;">
+        ⚠️ <strong>Objectif :</strong> Transformer le diagnostic en plan d'action opérationnel.
+      </div>
+      <div class="table-wrapper">
+        <table class="plan-table" id="planTable">
+          <thead>
+            <tr>
+              <th>Action concrète</th>
+              <th>Acteurs mobilisés</th>
+              <th>Échéance</th>
+              <th>Indicateur de suivi</th>
+              <th>Ressources</th>
+            </tr>
+          </thead>
+          <tbody id="planBody">
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px; display:flex; gap:10px;">
+        <button class="btn btn-vert" onclick="ajouterLignePlan()">+ Ajouter une action</button>
+        <button class="btn btn-bleu" onclick="exporterPlan()">📤 Exporter le plan</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== IA & PROMPTS ==================== -->
+<section id="ia">
+
+  <!-- Liens outils IA -->
+  <div class="card">
+    <h2>🤖 Outils IA pour le pilotage</h2>
+    <p style="font-size:0.82rem; color:var(--texte-clair); margin-bottom:14px;">L'IA générative est un assistant capable de traiter rapidement de grandes quantités d'informations. Elle n'est ni un oracle ni un substitut au jugement du chef d'établissement.</p>
+    <div class="ai-grid">
+      <a href="https://claude.ai" target="_blank" class="ai-card">
+        <div class="icon">🟠</div>
+        <div class="name">Claude</div>
+        <div class="desc">Anthropic — analyse, rédaction, synthèse</div>
+      </a>
+      <a href="https://chatgpt.com" target="_blank" class="ai-card">
+        <div class="icon">🟢</div>
+        <div class="name">ChatGPT</div>
+        <div class="desc">OpenAI — usage généraliste</div>
+      </a>
+      <a href="https://gemini.google.com" target="_blank" class="ai-card">
+        <div class="icon">🔵</div>
+        <div class="name">Gemini</div>
+        <div class="desc">Google — intégré à Drive/Docs</div>
+      </a>
+      <a href="https://copilot.microsoft.com" target="_blank" class="ai-card">
+        <div class="icon">🟣</div>
+        <div class="name">Copilot</div>
+        <div class="desc">Microsoft — intégré à Office 365</div>
+      </a>
+      <a href="https://www.perplexity.ai" target="_blank" class="ai-card">
+        <div class="icon">🔷</div>
+        <div class="name">Perplexity</div>
+        <div class="desc">Recherche augmentée par l'IA</div>
+      </a>
+      <a href="https://mistral.ai/fr/chat" target="_blank" class="ai-card">
+        <div class="icon">🇫🇷</div>
+        <div class="name">Le Chat</div>
+        <div class="desc">Mistral AI — solution française</div>
+      </a>
+      <a href="https://NotebookLM.google.com" target="_blank" class="ai-card">
+        <div class="icon">📓</div>
+        <div class="name">NotebookLM</div>
+        <div class="desc">Google — analyse de documents</div>
+      </a>
+      <a href="https://www.canva.com/fr_fr/magic/" target="_blank" class="ai-card">
+        <div class="icon">🎨</div>
+        <div class="name">Canva Magic</div>
+        <div class="desc">Création de visuels et présentations</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- GÉNÉRATEUR DE PROMPTS ACTIF -->
+  <div class="prompt-builder">
+    <h2>⚡ Générateur de prompts actif</h2>
+    <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:16px;">Construisez un prompt personnalisé en remplissant votre contexte — copiez-le directement dans l'outil IA de votre choix.</p>
+
+    <div class="pb-form">
+      <div>
+        <label>Type d'établissement</label>
+        <select id="pb-type" onchange="genererPromptActif()">
+          <option value="">— Choisir —</option>
+          <option>École primaire catholique sous contrat</option>
+          <option>Collège catholique sous contrat</option>
+          <option>Lycée général catholique sous contrat</option>
+          <option>Lycée professionnel catholique sous contrat</option>
+          <option>Établissement multi-niveaux (1er et 2nd degré)</option>
+        </select>
+      </div>
+      <div>
+        <label>Nombre d'élèves</label>
+        <input type="text" id="pb-effectifs" placeholder="ex: 450 élèves" oninput="genererPromptActif()" />
+      </div>
+      <div>
+        <label>Contexte territorial</label>
+        <select id="pb-contexte" onchange="genererPromptActif()">
+          <option value="">— Choisir —</option>
+          <option>Urbain (grande ville)</option>
+          <option>Péri-urbain</option>
+          <option>Rural / semi-rural</option>
+          <option>Zone sensible / REP</option>
+        </select>
+      </div>
+      <div>
+        <label>Objectif du prompt</label>
+        <select id="pb-objectif" onchange="genererPromptActif()">
+          <option value="">— Choisir —</option>
+          <option value="synthese">Synthèse d'enquête de satisfaction</option>
+          <option value="climat">Analyse du climat scolaire</option>
+          <option value="autoeval">Rédaction d'une synthèse d'auto-évaluation</option>
+          <option value="plan">Construction d'un plan d'amélioration</option>
+          <option value="externe">Préparation à l'évaluation externe CEE</option>
+          <option value="libre">Prompt libre / personnalisé</option>
+        </select>
+      </div>
+      <div class="full">
+        <label>Données ou contexte spécifique à partager avec l'IA</label>
+        <textarea id="pb-donnees" placeholder="Ex: taux d'absentéisme 8%, résultats brevet 78%, enquête satisfaction 65% familles satisfaites..." oninput="genererPromptActif()"></textarea>
+      </div>
+      <div class="full">
+        <label>Ce que vous attendez comme résultat</label>
+        <input type="text" id="pb-attendu" placeholder="Ex: un plan d'action en 5 points prioritaires, structuré par domaine" oninput="genererPromptActif()" />
+      </div>
+    </div>
+
+    <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:8px;">▼ Votre prompt généré :</div>
+    <div class="prompt-output" id="promptOutput">Remplissez les champs ci-dessus pour générer votre prompt personnalisé…</div>
+
+    <div class="btns">
+      <button class="btn btn-or" onclick="copierPromptActif()">📋 Copier le prompt</button>
+      <a id="lien-claude" href="https://claude.ai" target="_blank" class="btn btn-bleu" style="text-decoration:none;">→ Ouvrir Claude</a>
+      <a href="https://chatgpt.com" target="_blank" class="btn" style="background:#10a37f; color:white; text-decoration:none;">→ Ouvrir ChatGPT</a>
+      <a href="https://mistral.ai/fr/chat" target="_blank" class="btn" style="background:#ff7000; color:white; text-decoration:none;">→ Ouvrir Le Chat</a>
+    </div>
+  </div>
+
+  <!-- PROMPTS PRÊTS À L'EMPLOI -->
+  <div class="card">
+    <h2>🧭 Prompts prêts à l'emploi</h2>
+    <p style="font-size:0.82rem; color:var(--texte-clair); margin-bottom:16px;">Utilisez ces prompts directement avec Claude, ChatGPT, Gemini… Cliquez sur <em>Copier</em> puis collez dans l'outil IA.</p>
+
+    <div class="prompt-card">
+      <h3>PROMPT 1 — Synthèse d'enquête de satisfaction</h3>
+      <pre id="p1">Tu es un expert en pilotage d'établissement scolaire. Je vais te soumettre les résultats bruts d'une enquête de satisfaction menée auprès des familles / élèves / personnels de mon établissement.
+
+Mon établissement : [type d'établissement], [X] élèves, [contexte géographique].
+
+Résultats de l'enquête : [copier ici les données brutes]
+
+Rédige une synthèse structurée en :
+1. Points de satisfaction majeurs
+2. Points d'insatisfaction à traiter en priorité
+3. 3 recommandations opérationnelles classées par ordre de priorité
+4. Un tableau de bord synthétique (forces / axes d'amélioration / actions prioritaires)</pre>
+      <button class="copy-btn" onclick="copierPrompt('p1', this)">📋 Copier</button>
+    </div>
+
+    <div class="prompt-card">
+      <h3>PROMPT 2 — Analyse du climat scolaire</h3>
+      <pre id="p2">Je suis chef d'établissement scolaire catholique sous contrat.
+Voici les données dont je dispose sur le climat scolaire de mon établissement :
+- Taux d'absentéisme élèves : [X]%
+- Nombre d'incidents disciplinaires : [X] sur l'année
+- Résultats enquête bien-être élèves : [X]% satisfaits
+- Contexte particulier : [préciser si nécessaire]
+
+Analyse ces données et propose :
+1. Un diagnostic du climat scolaire (sur une échelle de 1 à 4)
+2. Les facteurs explicatifs probables
+3. Un plan d'action en 5 mesures concrètes et réalistes
+4. Des indicateurs de suivi pour évaluer les améliorations</pre>
+      <button class="copy-btn" onclick="copierPrompt('p2', this)">📋 Copier</button>
+    </div>
+
+    <div class="prompt-card">
+      <h3>PROMPT 3 — Rédaction d'une synthèse d'auto-évaluation</h3>
+      <pre id="p3">Je suis chef d'établissement d'un [type] catholique sous contrat, [X] élèves, [contexte].
+
+Résultats de mon auto-diagnostic par domaine (note de 1 à 4) :
+- Pilotage stratégique : [note]/4
+- Réussite des élèves : [note]/4
+- Pilotage pédagogique : [note]/4
+- Climat scolaire : [note]/4
+- Relation familles : [note]/4
+- Ressources humaines : [note]/4
+- Projet éducatif et caractère propre : [note]/4
+- Ouverture sur le territoire : [note]/4
+
+Rédige une synthèse d'auto-évaluation de 400 mots maximum, structurée, valorisant les points forts et proposant des pistes d'amélioration réalistes. Ton : professionnel, positif, orienté action.</pre>
+      <button class="copy-btn" onclick="copierPrompt('p3', this)">📋 Copier</button>
+    </div>
+
+    <div class="prompt-card">
+      <h3>PROMPT 4 — Construction d'un plan d'amélioration</h3>
+      <pre id="p4">Je suis chef d'établissement scolaire catholique. Mon diagnostic a mis en évidence :
+
+Axe d'amélioration prioritaire : [décrire précisément le point à améliorer]
+Contexte : [décrire la situation actuelle]
+Contraintes : [budget, temps, ressources humaines disponibles]
+Horizon : [1 an / 2 ans]
+
+Propose un plan d'amélioration structuré avec :
+1. Objectif SMART (spécifique, mesurable, atteignable, réaliste, temporel)
+2. 3 à 5 actions concrètes avec responsables et échéances
+3. Ressources nécessaires (humaines, matérielles, budgétaires)
+4. Indicateurs de suivi et points d'étape
+5. Risques identifiés et modalités de régulation</pre>
+      <button class="copy-btn" onclick="copierPrompt('p4', this)">📋 Copier</button>
+    </div>
+
+    <div class="prompt-card">
+      <h3>PROMPT 5 — Préparation à l'évaluation externe CEE</h3>
+      <pre id="p5">Je vais être soumis à une évaluation externe du CEE dans [X mois].
+
+Mon établissement : [type, effectifs, contexte géographique, niveau socio-économique].
+Points forts identifiés dans l'auto-évaluation : [lister]
+Points de vigilance : [lister]
+
+Aide-moi à :
+1. Identifier les documents à préparer en priorité
+2. Formuler un discours de présentation de l'établissement (3 min) mettant en valeur ses atouts
+3. Anticiper les questions probables de l'équipe d'évaluation
+4. Proposer une organisation de la semaine d'évaluation (qui rencontrer, dans quel ordre)
+5. Rédiger une trame pour le rapport d'auto-évaluation</pre>
+      <button class="copy-btn" onclick="copierPrompt('p5', this)">📋 Copier</button>
+    </div>
+  </div>
+
+  <!-- CE QUE L'IA PEUT/NE PEUT PAS FAIRE -->
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+    <div class="card vert">
+      <h2>✅ Ce que l'IA peut faire</h2>
+      <ul>
+        <li>Synthétiser des données brutes (enquêtes, indicateurs)</li>
+        <li>Rédiger des premières versions de documents</li>
+        <li>Analyser des tendances quantitatives ou textuelles</li>
+        <li>Proposer des plans d'action structurés</li>
+        <li>Adapter le niveau de langage d'un document</li>
+      </ul>
+    </div>
+    <div class="card rouge">
+      <h2>❌ Ce que l'IA ne peut pas faire</h2>
+      <ul>
+        <li>Porter un jugement de valeur sur vos équipes</li>
+        <li>Remplacer le dialogue humain</li>
+        <li>Décider des priorités à votre place</li>
+        <li>Garantir la vérité des données qu'elle traite</li>
+        <li>Connaître la réalité singulière de votre établissement</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== ASSISTANTS ==================== -->
+<section id="assistants">
+  <div class="card">
+    <h2>💬 Assistants IA spécialisés</h2>
+    <p style="font-size:0.82rem; color:var(--texte-clair); margin-bottom:18px;">Ces assistants sont configurés spécifiquement pour les chefs d'établissement de l'Enseignement catholique. Cliquez pour les ouvrir directement.</p>
+  </div>
+
+  <a href="https://chatgpt.com/g/g-68cd41c0ba4481919eeea68d4806cfb4-outils-ddec-et-ce-seine-et-marne" target="_blank" class="assistant-card">
+    <div class="icon">🏛️</div>
+    <div class="info">
+      <h3>Assistant DDEC — Questions diverses</h3>
+      <p>Outils DDEC et CE Seine-et-Marne — Assistant spécialisé pour les questions liées à la DDEC : textes réglementaires, démarches administratives, pilotage d'établissement dans le diocèse de Seine-et-Marne.</p>
+      <div style="margin-top:8px;"><span class="tag tag-bleu">DDEC</span><span class="tag tag-vert">Questions diverses</span><span class="tag tag-or">ChatGPT</span></div>
+    </div>
+    <div class="badge-ext">↗ Ouvrir</div>
+  </a>
+
+  <a href="https://chatgpt.com/g/g-ixh76OpRS-conseiller-chef-d-etablissement-de-l-ec" target="_blank" class="assistant-card">
+    <div class="icon">👨‍💼</div>
+    <div class="info">
+      <h3>Assistant CE — Conseiller Chef d'établissement</h3>
+      <p>Conseiller Chef d'établissement de l'EC — Assistant dédié aux chefs d'établissement de l'Enseignement catholique : pilotage, gouvernance, gestion RH, projet éducatif, évaluation.</p>
+      <div style="margin-top:8px;"><span class="tag tag-bleu">Chef d'établissement</span><span class="tag tag-vert">Pilotage EC</span><span class="tag tag-or">ChatGPT</span></div>
+    </div>
+    <div class="badge-ext">↗ Ouvrir</div>
+  </a>
+
+  <div class="card" style="margin-top:6px;">
+    <h2>💡 Comment utiliser ces assistants</h2>
+    <ul>
+      <li style="font-size:0.84rem; margin-bottom:6px;">Cliquez sur l'assistant de votre choix — il s'ouvre dans une nouvelle fenêtre</li>
+      <li style="font-size:0.84rem; margin-bottom:6px;">Décrivez votre situation ou posez votre question directement</li>
+      <li style="font-size:0.84rem; margin-bottom:6px;">Vous pouvez coller les prompts générés dans l'onglet <strong>🤖 IA & Prompts</strong></li>
+      <li style="font-size:0.84rem;">Un compte ChatGPT est nécessaire (gratuit)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ==================== RESSOURCES ==================== -->
+<section id="ressources">
+
+  <a href="https://cneap365-my.sharepoint.com/:f:/g/personal/bruno_terrasson_cneap_fr/IgCSVm5HAsOmRpGgnW3Ny8w6AdWIIReah_FYmVP54LAaE3U?e=GpqW4B" target="_blank" class="download-banner">
+    <div class="dl-icon">📥</div>
+    <div class="dl-text">
+      <h3>Télécharger le support PDF de la formation</h3>
+      <p>Dossier_Formation_Autoevaluation_Sophiae — Accès au dossier complet sur SharePoint</p>
+    </div>
+    <div class="dl-btn">⬇ Télécharger</div>
+  </a>
+
+  <div class="card">
+    <h2>📜 Textes réglementaires</h2>
+    <a href="https://www.legifrance.gouv.fr/loda/id/JORFTEXT000038829065" target="_blank" class="ressource-link">
+      <span class="rl-icon">⚖️</span>
+      <div class="rl-text"><strong>Loi pour une École de la confiance</strong><span>Loi n°2019-791 du 26 juillet 2019 (version consolidée) — legifrance.gouv.fr</span></div>
+      <span class="rl-ext">↗</span>
+    </a>
+    <a href="https://www.legifrance.gouv.fr/codes/id/LEGISCTA000038902409" target="_blank" class="ressource-link">
+      <span class="rl-icon">📋</span>
+      <div class="rl-text"><strong>Articles L.241-12 à L.241-14 du Code de l'éducation</strong><span>Articles sur l'évaluation des établissements — legifrance.gouv.fr</span></div>
+      <span class="rl-ext">↗</span>
+    </a>
+    <a href="https://www.education.gouv.fr/bo/21/Hebdo47/MENE2136384C.htm" target="_blank" class="ressource-link">
+      <span class="rl-icon">📬</span>
+      <div class="rl-text"><strong>Circulaire du 8 décembre 2021</strong><span>Application de la loi 2019-791 dans l'enseignement agricole — education.gouv.fr</span></div>
+      <span class="rl-ext">↗</span>
+    </a>
+    <a href="https://www.education.gouv.fr/sites/default/files/2025-05/cee-2025-cadre--valuation-1er-degr--440085.pdf" target="_blank" class="ressource-link">
+      <span class="rl-icon">🏛️</span>
+      <div class="rl-text"><strong>Référentiel d'évaluation du CEE 2025</strong><span>Cadre d'évaluation officiel (PDF) — education.gouv.fr</span></div>
+      <span class="rl-ext">↗</span>
+    </a>
+  </div>
+
+  <div class="card">
+    <h2>🔗 Ressources nationales et CEE</h2>
+    <a href="https://www.education.gouv.fr/conseil-d-evaluation-de-l-ecole-469889" target="_blank" class="ressource-link">
+      <span class="rl-icon">🌐</span>
+      <div class="rl-text"><strong>Site officiel du CEE</strong><span>Conseil d'Évaluation de l'École — education.gouv.fr</span></div>
+      <span class="rl-ext">↗</span>
+    </a>
+    <a href="https://www.ih2ef.gouv.fr/auto-evaluation-des-etablissements-du-second-degre-guide-methodologique" target="_blank" class="ressource-link">
+      <span class="rl-icon">📚</span>
+      <div class="rl-text"><strong>Guide méthodologique d'auto-évaluation</strong><span>IH2EF — ih2ef.gouv.fr</span></div>
+      <span class="rl-ext">↗</span>
+    </a>
+    <a href="https://catalogue.depp.education.fr/index.php/catalog/162" target="_blank" class="ressource-link">
+      <span class="rl-icon">📊</span>
+      <div class="rl-text"><strong>Indicateurs REP+VAL / IVA (IVAC)</strong><span>Indicateurs de valeur ajoutée des collèges — catalogue.depp.education.fr</span></div>
+      <span class="rl-ext">↗</span>
+    </a>
+  </div>
+
+  <div class="card">
+    <h2>✝️ Ressources de l'Enseignement catholique</h2>
+    <a href="https://enseignement-catholique.fr/" target="_blank" class="ressource-link">
+      <span class="rl-icon">🏫</span>
+      <div class="rl-text"><strong>SGEC — Secrétariat Général de l'Enseignement Catholique</strong><span>enseignement-catholique.fr</span></div>
+      <span class="rl-ext">↗</span>
+    </a>
+    <a href="https://www.formiris.org" target="_blank" class="ressource-link">
+      <span class="rl-icon">📖</span>
+      <div class="rl-text"><strong>Formiris — Formation dans l'Enseignement catholique</strong><span>formiris.org</span></div>
+      <span class="rl-ext">↗</span>
+    </a>
+    <a href="https://www.fnogec.org" target="_blank" class="ressource-link">
+      <span class="rl-icon">⚙️</span>
+      <div class="rl-text"><strong>FNOGEC — Fédération Nationale des OGEC</strong><span>fnogec.org</span></div>
+      <span class="rl-ext">↗</span>
+    </a>
+    <a href="https://www.cneap.fr" target="_blank" class="ressource-link">
+      <span class="rl-icon">🌾</span>
+      <div class="rl-text"><strong>CNEAP — Enseignement agricole catholique</strong><span>cneap.fr</span></div>
+      <span class="rl-ext">↗</span>
+    </a>
+  </div>
+
+
+</section>
+
+<!-- ==================== ENGAGEMENTS ==================== -->
+<section id="engagements">
+  <div class="card">
+    <h2>✍️ Mes engagements issus de la formation</h2>
+    <p style="font-size:0.83rem; color:var(--texte-clair); margin-bottom:18px;">Notez vos engagements personnels et la date de mise en œuvre envisagée. Ces engagements vous seront utiles pour suivre votre progression.</p>
+    <div id="engagements-list"></div>
+    <div style="margin-top:14px; display:flex; gap:10px;">
+      <button class="btn btn-bleu" onclick="exportEngagements()">📤 Exporter mes engagements</button>
+      <button class="btn btn-gris" onclick="resetEngagements()">🔄 Réinitialiser</button>
+    </div>
+  </div>
+  <div class="card or">
+    <h2>📅 Informations de session</h2>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+      <div>
+        <label style="font-size:0.8rem; font-weight:600;">Formation réalisée le :</label>
+        <input type="date" id="date-formation" style="display:block; margin-top:4px; border:1px solid var(--gris-bord); border-radius:8px; padding:7px 10px; font-size:0.85rem; width:100%;">
+      </div>
+      <div>
+        <label style="font-size:0.8rem; font-weight:600;">Établissement :</label>
+        <input type="text" id="etab-nom" placeholder="Nom de votre établissement" style="display:block; margin-top:4px; border:1px solid var(--gris-bord); border-radius:8px; padding:7px 10px; font-size:0.85rem; width:100%;">
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="toast">✅ Copié dans le presse-papiers !</div>
+
+<script>
+// ========== NAVIGATION ==========
+function showSection(id) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const navLinks = document.querySelectorAll('nav a');
+  navLinks.forEach(a => { if (a.getAttribute('onclick') && a.getAttribute('onclick').includes(id)) a.classList.add('active'); });
+  window.scrollTo(0,0);
+}
+
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ========== DONNÉES ==========
+const domaines = [
+  {
+    id: 'D1', label: 'DOMAINE 1 — Pilotage stratégique et gouvernance', icon: '🏛️',
+    criteres: [
+      'Le projet d\'établissement est connu et approprié par tous les acteurs',
+      'Les instances de gouvernance fonctionnent régulièrement et efficacement',
+      'Des indicateurs de pilotage sont définis, suivis et communiqués',
+      'La communauté éducative est impliquée dans les décisions stratégiques',
+      'Les partenariats institutionnels sont structurés (tutelle, OGEC, autorité académique)'
+    ]
+  },
+  {
+    id: 'D2', label: 'DOMAINE 2 — Réussite et parcours des élèves', icon: '🎓',
+    criteres: [
+      'Les résultats aux examens et évaluations nationales sont analysés régulièrement',
+      'Les écarts de réussite entre groupes d\'élèves sont identifiés et traités',
+      'Des dispositifs d\'accompagnement personnalisé sont mis en place et évalués',
+      'Les parcours individuels sont suivis et les transitions anticipées',
+      'L\'établissement dispose d\'une politique inclusive pour les élèves à besoins particuliers'
+    ]
+  },
+  {
+    id: 'D3', label: 'DOMAINE 3 — Pilotage pédagogique', icon: '📚',
+    criteres: [
+      'Un projet pédagogique d\'établissement est formalisé et mis en œuvre',
+      'La diversification pédagogique est encouragée et soutenue',
+      'Les pratiques collaboratives entre enseignants sont développées',
+      'Le numérique est intégré de façon pertinente dans les pratiques d\'enseignement',
+      'La formation continue des enseignants est organisée et en lien avec le projet'
+    ]
+  },
+  {
+    id: 'D4', label: 'DOMAINE 4 — Climat scolaire et vie scolaire', icon: '🌤️',
+    criteres: [
+      'Le règlement intérieur est connu, appliqué et régulièrement évalué',
+      'Le bien-être des élèves fait l\'objet d\'une attention et d\'un suivi réguliers',
+      'Les situations de harcèlement ou de violences sont prises en charge efficacement',
+      'La vie scolaire est animée et participe à la construction du vivre-ensemble',
+      'Les élèves sont acteurs de la vie de l\'établissement (délégués, projets)'
+    ]
+  },
+  {
+    id: 'D5', label: 'DOMAINE 5 — Relation avec les familles', icon: '👨‍👩‍👧',
+    criteres: [
+      'La communication avec les familles est régulière, claire et accessible',
+      'Les familles sont associées aux projets et grandes orientations de l\'établissement',
+      'Les instances de représentation des parents sont actives et bien informées',
+      'Les situations difficiles sont traitées en lien avec les familles',
+      'L\'établissement organise des temps de rencontre et d\'implication des familles'
+    ]
+  },
+  {
+    id: 'D6', label: 'DOMAINE 6 — Gestion des ressources humaines', icon: '👥',
+    criteres: [
+      'L\'accueil et l\'intégration des nouveaux personnels sont organisés',
+      'L\'animation de l\'équipe pédagogique est assurée de manière régulière',
+      'Les entretiens professionnels et le suivi des parcours sont pratiqués',
+      'Le bien-être des personnels est pris en compte et suivi',
+      'La formation continue est encouragée et articulée avec le projet d\'établissement'
+    ]
+  },
+  {
+    id: 'D7', label: 'DOMAINE 7 — Projet éducatif et caractère propre', icon: '✝️',
+    criteres: [
+      'Le projet éducatif est connu, partagé et vivant dans l\'établissement',
+      'La dimension spirituelle et pastorale est proposée et accessible à tous',
+      'Les valeurs de l\'EC se traduisent dans les pratiques quotidiennes',
+      'L\'attention aux plus fragiles et la solidarité sont des priorités concrètes',
+      'L\'identité catholique de l\'établissement est assumée et communiquée'
+    ]
+  },
+  {
+    id: 'D8', label: 'DOMAINE 8 — Ouverture sur le territoire', icon: '🌍',
+    criteres: [
+      'L\'établissement entretient des partenariats avec les acteurs du territoire',
+      'Des projets d\'ouverture culturelle, sportive ou professionnelle sont développés',
+      'L\'établissement contribue à la vie locale et diocésaine',
+      'Les relations avec les anciens élèves et les partenaires économiques sont cultivées',
+      'L\'établissement s\'inscrit dans une démarche de développement durable'
+    ]
+  }
+];
+
+const scores = {}; // domaine -> critere -> note
+const obs = {};    // domaine -> critere -> obs
+
+// ========== DIAGNOSTIC ==========
+function buildDiagnostic() {
+  const container = document.getElementById('domainesContainer');
+  const radar = document.getElementById('radarContainer');
+  container.innerHTML = '';
+  radar.innerHTML = '';
+
+  domaines.forEach(dom => {
+    scores[dom.id] = {};
+    obs[dom.id] = {};
+
+    // Radar bar
+    radar.innerHTML += `
+      <div class="radar-item">
+        <div class="radar-label">${dom.icon} ${dom.id}</div>
+        <div class="radar-bar"><div class="radar-fill" id="radar-${dom.id}" style="width:0%"></div></div>
+        <div class="radar-score" id="rscore-${dom.id}">—</div>
+      </div>`;
+
+    // Domaine block
+    const block = document.createElement('div');
+    block.innerHTML = `
+      <div class="domaine-header" onclick="toggleDomaine('body-${dom.id}')">
+        ${dom.icon} ${dom.label}
+        <span style="margin-left:auto; font-size:0.78rem; opacity:0.8;" id="dscore-${dom.id}">▼</span>
+      </div>
+      <div class="domaine-body" id="body-${dom.id}">
+        <div style="display:grid; grid-template-columns: 1fr 140px 200px; font-size:0.72rem; font-weight:700; color:var(--texte-clair); padding:8px 18px; border-bottom:1px solid var(--gris-bord);">
+          <div>Critère</div><div>Niveau (1→4)</div><div>Observations</div>
+        </div>
+        ${dom.criteres.map((c, i) => `
+          <div class="critere-row">
+            <div class="critere-text">${c}</div>
+            <div class="stars">
+              ${[1,2,3,4].map(n => `<button id="btn-${dom.id}-${i}-${n}" onclick="setScore('${dom.id}',${i},${n})">${n}</button>`).join('')}
+            </div>
+            <textarea class="obs-input" placeholder="Observations..." onchange="setObs('${dom.id}',${i},this.value)"></textarea>
+          </div>
+        `).join('')}
+        <div style="padding:10px 18px; background:#f8fafc;">
+          <div class="score-bar"><div class="score-fill" id="bar-${dom.id}" style="width:0%"></div></div>
+          <div class="domaine-score" id="label-${dom.id}">Score : —</div>
+        </div>
+      </div>`;
+    container.appendChild(block);
+  });
+}
+
+function toggleDomaine(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+function setScore(did, ci, n) {
+  scores[did][ci] = n;
+  [1,2,3,4].forEach(v => {
+    const btn = document.getElementById(`btn-${did}-${ci}-${v}`);
+    if (btn) btn.classList.toggle('active', v === n);
+  });
+  updateDomainScore(did);
+}
+
+function setObs(did, ci, val) { obs[did][ci] = val; }
+
+function updateDomainScore(did) {
+  const vals = Object.values(scores[did]).filter(v => v > 0);
+  if (vals.length === 0) return;
+  const avg = vals.reduce((a,b) => a+b, 0) / vals.length;
+  const pct = ((avg - 1) / 3) * 100;
+  document.getElementById(`bar-${did}`).style.width = pct + '%';
+  document.getElementById(`label-${did}`).textContent = `Score moyen : ${avg.toFixed(1)}/4 (${vals.length} critère${vals.length>1?'s':''} renseigné${vals.length>1?'s':''})`;
+  document.getElementById(`dscore-${did}`).textContent = `${avg.toFixed(1)}/4 ▼`;
+  document.getElementById(`radar-${did}`).style.width = pct + '%';
+  document.getElementById(`rscore-${did}`).textContent = `${avg.toFixed(1)}/4`;
+}
+
+function exportDiagnostic() {
+  let txt = 'AUTO-DIAGNOSTIC D\'ÉTABLISSEMENT\n';
+  txt += '='.repeat(50) + '\n\n';
+  domaines.forEach(dom => {
+    txt += `${dom.label}\n${'-'.repeat(40)}\n`;
+    dom.criteres.forEach((c, i) => {
+      const s = scores[dom.id][i] || '—';
+      const o = obs[dom.id][i] || '';
+      txt += `  • ${c}\n    Niveau : ${s}/4${o ? '\n    Obs : ' + o : ''}\n`;
+    });
+    const vals = Object.values(scores[dom.id]).filter(v=>v>0);
+    if (vals.length) txt += `  Score moyen : ${(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1)}/4\n`;
+    txt += '\n';
+  });
+  txt += 'SYNTHÈSE\n' + '-'.repeat(40) + '\n';
+  txt += 'Forces : ' + (document.getElementById('synth-forces').value || '—') + '\n';
+  txt += 'Axes amélioration : ' + (document.getElementById('synth-axes').value || '—') + '\n';
+  txt += 'Priorité : ' + (document.getElementById('synth-priorite').value || '—') + '\n';
+  downloadTxt(txt, 'auto-diagnostic.txt');
+}
+
+function genererPromptDiag() {
+  let notes = domaines.map(dom => {
+    const vals = Object.values(scores[dom.id]).filter(v=>v>0);
+    const avg = vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1) : '?';
+    return `- ${dom.label.replace('DOMAINE ','').split('—')[1].trim()} : ${avg}/4`;
+  }).join('\n');
+  const prompt = `Je suis chef d'établissement catholique sous contrat. Voici les résultats de mon auto-diagnostic (note de 1 à 4) :\n\n${notes}\n\nForces : ${document.getElementById('synth-forces').value || '[à compléter]'}\nAxes d'amélioration : ${document.getElementById('synth-axes').value || '[à compléter]'}\nPriorité : ${document.getElementById('synth-priorite').value || '[à compléter]'}\n\nRédige une synthèse d'auto-évaluation de 400 mots, valorisant mes points forts et proposant 3 axes d'amélioration prioritaires avec des actions concrètes.`;
+  navigator.clipboard.writeText(prompt).then(() => showToast('Prompt copié ! Collez-le dans votre outil IA.'));
+}
+
+function resetDiagnostic() {
+  if (confirm('Réinitialiser tout le diagnostic ?')) { Object.keys(scores).forEach(k => scores[k] = {}); buildDiagnostic(); }
+}
+
+// ========== CHECKLIST ==========
+const docsItems = [
+  'Projet d\'établissement (version en cours)',
+  'Projet éducatif et texte sur le caractère propre',
+  'Règlement intérieur',
+  'Organigramme de direction et de gouvernance',
+  'Statuts de l\'association gestionnaire (OGEC)',
+  'PV du Conseil d\'Administration (3 dernières années)',
+  'PV du Conseil pédagogique (3 dernières années)',
+  'PV des conseils de classe (dernière année)',
+  'Convention de scolarité'
+];
+const dataItems = [
+  'Effectifs par niveau et par classe (3 dernières années)',
+  'Résultats aux examens et évaluations nationales',
+  'Indicateurs APAE ou IVAL (2nd degré)',
+  'Taux d\'absentéisme élèves par niveau',
+  'Taux d\'absentéisme enseignants',
+  'Données sur les incidents et signalements',
+  'Résultats évaluations nationales (CE1, CM2, 6e, 2nde)',
+  'Enquêtes de satisfaction familles et élèves',
+  'Données sur les parcours post-bac'
+];
+const pratiquesItems = [
+  'L\'auto-évaluation a déjà été conduite dans l\'établissement',
+  'Les enseignants ont été informés de la démarche d\'évaluation',
+  'Les parents ont été informés de la démarche',
+  'Les élèves ont été associés à la réflexion',
+  'Un groupe de pilotage de l\'auto-évaluation a été constitué',
+  'Un calendrier de l\'auto-évaluation a été défini et communiqué',
+  'Des enquêtes internes ont été menées (élèves, personnels, familles)',
+  'Les résultats du diagnostic ont été partagés en instances'
+];
+
+function buildChecklist() {
+  buildCheckSection('checklist-docs', docsItems, 'doc', true);
+  buildCheckSection('checklist-data', dataItems, 'dat', true);
+  buildCheckSection('checklist-pratiques', pratiquesItems, 'prat', false);
+}
+
+function buildCheckSection(containerId, items, prefix, hasDate) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = items.map((item, i) => `
+    <div class="check-item" id="${prefix}-row-${i}">
+      <input type="checkbox" id="${prefix}-${i}" onchange="toggleCheck('${prefix}-row-${i}', this)">
+      <label for="${prefix}-${i}">${item}</label>
+      ${hasDate ? `<select onchange="" style="font-size:0.75rem; padding:3px 6px; border:1px solid var(--gris-bord); border-radius:5px;">
+        <option value="">Disponible ?</option>
+        <option>Oui</option>
+        <option>Non</option>
+        <option>En cours</option>
+      </select>` : '<input type="text" placeholder="Commentaire..." style="border:1px solid var(--gris-bord); border-radius:5px; padding:3px 8px; font-size:0.75rem; width:150px;">'}
+    </div>
+  `).join('');
+}
+
+function toggleCheck(rowId, cb) {
+  document.getElementById(rowId).classList.toggle('checked', cb.checked);
+}
+
+function exportChecklist() {
+  let txt = 'CHECK-LIST DE PRÉPARATION À L\'ÉVALUATION\n' + '='.repeat(50) + '\n\n';
+  txt += 'A — DOCUMENTS INSTITUTIONNELS\n' + '-'.repeat(40) + '\n';
+  docsItems.forEach((item, i) => {
+    const cb = document.getElementById(`doc-${i}`);
+    txt += `[${cb && cb.checked ? 'X' : ' '}] ${item}\n`;
+  });
+  txt += '\nB — DONNÉES ET INDICATEURS\n' + '-'.repeat(40) + '\n';
+  dataItems.forEach((item, i) => {
+    const cb = document.getElementById(`dat-${i}`);
+    txt += `[${cb && cb.checked ? 'X' : ' '}] ${item}\n`;
+  });
+  txt += '\nC — PRATIQUES DE PILOTAGE\n' + '-'.repeat(40) + '\n';
+  pratiquesItems.forEach((item, i) => {
+    const cb = document.getElementById(`prat-${i}`);
+    txt += `[${cb && cb.checked ? 'X' : ' '}] ${item}\n`;
+  });
+  downloadTxt(txt, 'checklist-evaluation.txt');
+}
+
+// ========== PLAN D'ACTION ==========
+function initPlan() {
+  const tbody = document.getElementById('planBody');
+  for (let i = 0; i < 5; i++) ajouterLignePlan(false);
+}
+
+function ajouterLignePlan(scroll = true) {
+  const tbody = document.getElementById('planBody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = ['Action concrète', 'Acteurs mobilisés', 'Échéance', 'Indicateur de suivi', 'Ressources'].map(ph =>
+    `<td style="border:1px solid var(--gris-bord);"><input type="text" placeholder="${ph}..." style="width:100%; border:none; padding:6px 8px; font-size:0.8rem;"></td>`
+  ).join('') + `<td style="border:1px solid var(--gris-bord); text-align:center;"><button onclick="this.closest('tr').remove()" style="border:none; background:none; cursor:pointer; color:#ef4444; font-size:1rem;">🗑</button></td>`;
+  tbody.appendChild(tr);
+  if (scroll) tr.scrollIntoView({ behavior: 'smooth' });
+}
+
+function exporterPlan() {
+  const rows = document.querySelectorAll('#planBody tr');
+  let txt = 'PLAN D\'ACTION\n' + '='.repeat(60) + '\n';
+  txt += 'Action | Acteurs | Échéance | Indicateur | Ressources\n' + '-'.repeat(60) + '\n';
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    txt += [...inputs].map(i => i.value || '—').join(' | ') + '\n';
+  });
+  downloadTxt(txt, 'plan-action.txt');
+}
+
+// ========== ENGAGEMENTS ==========
+function buildEngagements() {
+  const list = document.getElementById('engagements-list');
+  list.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    list.innerHTML += `
+      <div class="engagement-row">
+        <div class="engagement-num">${i}</div>
+        <input class="engagement-input" type="text" placeholder="Mon engagement n°${i}..." id="eng-${i}">
+        <input class="engagement-date" type="date" id="engdate-${i}" title="Date de mise en œuvre">
+      </div>`;
+  }
+}
+
+function exportEngagements() {
+  const nom = document.getElementById('etab-nom').value || '—';
+  const date = document.getElementById('date-formation').value || '—';
+  let txt = `MES ENGAGEMENTS ISSUS DE LA FORMATION\n${'='.repeat(50)}\n\nÉtablissement : ${nom}\nDate de formation : ${date}\n\n`;
+  for (let i = 1; i <= 5; i++) {
+    const eng = document.getElementById(`eng-${i}`)?.value || '—';
+    const d = document.getElementById(`engdate-${i}`)?.value || '—';
+    txt += `${i}. ${eng}\n   Date de mise en œuvre : ${d}\n\n`;
+  }
+  downloadTxt(txt, 'engagements-formation.txt');
+}
+
+function resetEngagements() {
+  if (confirm('Réinitialiser les engagements ?')) buildEngagements();
+}
+
+// ========== GÉNÉRATEUR ACTIF ==========
+const promptTemplates = {
+  synthese: (ctx) => `Tu es un expert en pilotage d'établissement scolaire.
+Je suis chef d'établissement${ctx.type ? ' d\'un ' + ctx.type : ''}${ctx.effectifs ? ', ' + ctx.effectifs : ''}${ctx.contexte ? ', en zone ' + ctx.contexte.toLowerCase() : ''}.
+
+${ctx.donnees ? 'Données disponibles :\n' + ctx.donnees + '\n\n' : ''}Rédige une synthèse structurée en :
+1. Points de satisfaction majeurs
+2. Points d'insatisfaction à traiter en priorité
+3. 3 recommandations opérationnelles${ctx.attendu ? '\n\nRésultat attendu : ' + ctx.attendu : ''}`,
+
+  climat: (ctx) => `Je suis chef d'établissement${ctx.type ? ' d\'un ' + ctx.type : ''}${ctx.effectifs ? ' de ' + ctx.effectifs : ''}${ctx.contexte ? ' (' + ctx.contexte + ')' : ''}.
+
+${ctx.donnees ? 'Données sur le climat scolaire :\n' + ctx.donnees + '\n\n' : ''}Analyse ces données et propose :
+1. Un diagnostic du climat scolaire (sur une échelle de 1 à 4)
+2. Les facteurs explicatifs probables
+3. Un plan d'action en 5 mesures concrètes${ctx.attendu ? '\n\nFormat attendu : ' + ctx.attendu : ''}`,
+
+  autoeval: (ctx) => `Je suis chef d'établissement${ctx.type ? ' d\'un ' + ctx.type : ''}${ctx.effectifs ? ', ' + ctx.effectifs : ''}${ctx.contexte ? ', ' + ctx.contexte : ''}.
+
+${ctx.donnees ? 'Résultats de mon auto-évaluation :\n' + ctx.donnees + '\n\n' : ''}Rédige une synthèse d'auto-évaluation de 400 mots maximum, valorisant les points forts et proposant des pistes d'amélioration réalistes.
+Ton : professionnel, positif, orienté action.${ctx.attendu ? '\n\nFormat : ' + ctx.attendu : ''}`,
+
+  plan: (ctx) => `Je suis chef d'établissement${ctx.type ? ' d\'un ' + ctx.type : ''}${ctx.contexte ? ' (' + ctx.contexte + ')' : ''}.
+
+${ctx.donnees ? 'Mon diagnostic :\n' + ctx.donnees + '\n\n' : ''}Propose un plan d'amélioration structuré avec :
+1. Objectif SMART
+2. 3 à 5 actions concrètes avec responsables et échéances
+3. Indicateurs de suivi${ctx.attendu ? '\n\nRésultat attendu : ' + ctx.attendu : ''}`,
+
+  externe: (ctx) => `Je vais être soumis à une évaluation externe du CEE.
+Mon établissement : ${ctx.type || '[type]'}${ctx.effectifs ? ', ' + ctx.effectifs : ''}${ctx.contexte ? ', ' + ctx.contexte : ''}.
+
+${ctx.donnees ? 'Contexte et données :\n' + ctx.donnees + '\n\n' : ''}Aide-moi à :
+1. Identifier les documents à préparer en priorité
+2. Formuler un discours de présentation (3 min)
+3. Anticiper les questions probables du CEE
+4. Proposer une organisation de la semaine d'évaluation${ctx.attendu ? '\n\nFormat attendu : ' + ctx.attendu : ''}`,
+
+  libre: (ctx) => `${ctx.type ? 'Contexte : ' + ctx.type + (ctx.effectifs ? ', ' + ctx.effectifs : '') + (ctx.contexte ? ', ' + ctx.contexte : '') + '\n\n' : ''}${ctx.donnees ? ctx.donnees + '\n\n' : ''}${ctx.attendu || 'Décrivez ici votre demande...'}`
+};
+
+function genererPromptActif() {
+  const ctx = {
+    type: document.getElementById('pb-type').value,
+    effectifs: document.getElementById('pb-effectifs').value,
+    contexte: document.getElementById('pb-contexte').value,
+    objectif: document.getElementById('pb-objectif').value,
+    donnees: document.getElementById('pb-donnees').value,
+    attendu: document.getElementById('pb-attendu').value
+  };
+  const out = document.getElementById('promptOutput');
+  if (!ctx.objectif) { out.textContent = 'Sélectionnez un objectif pour générer votre prompt…'; return; }
+  const tmpl = promptTemplates[ctx.objectif];
+  out.textContent = tmpl ? tmpl(ctx) : 'Choisissez un objectif pour générer le prompt.';
+}
+
+function copierPromptActif() {
+  const txt = document.getElementById('promptOutput').textContent;
+  navigator.clipboard.writeText(txt).then(() => showToast('Prompt copié !'));
+}
+
+// ========== COPIE PROMPTS ==========
+function copierPrompt(id, btn) {
+  const txt = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(txt).then(() => {
+    btn.textContent = '✅ Copié !';
+    btn.classList.add('copied');
+    showToast('Prompt copié dans le presse-papiers !');
+    setTimeout(() => { btn.textContent = '📋 Copier'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ========== UTILS ==========
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = '✅ ' + msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function downloadTxt(content, filename) {
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
+
+// ========== INIT ==========
+buildDiagnostic();
+buildChecklist();
+initPlan();
+buildEngagements();
+
+// Ouvrir le premier domaine par défaut
+setTimeout(() => toggleDomaine('body-D1'), 200);
+</script>
+</body>
+</html>
