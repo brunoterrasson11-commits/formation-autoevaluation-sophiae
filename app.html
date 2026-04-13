@@ -23,6 +23,49 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--gris-bg); color: var(--texte); }
 
+  /* LOGIN */
+  #login-screen {
+    position: fixed; inset: 0; z-index: 9999;
+    background: linear-gradient(135deg, var(--violet-fonce) 0%, #2A0840 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .login-box {
+    background: white; border-radius: 18px; padding: 44px 40px;
+    width: 100%; max-width: 380px; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .login-box .login-logo {
+    margin-bottom: 8px;
+  }
+  .login-box .login-logo svg { height: 52px; }
+  .login-box h2 {
+    font-size: 1.05rem; font-weight: 700; color: var(--violet-fonce);
+    margin-bottom: 6px;
+  }
+  .login-box p {
+    font-size: 0.8rem; color: var(--texte-clair); margin-bottom: 28px;
+  }
+  .login-box input[type="password"] {
+    width: 100%; padding: 12px 16px; border: 2px solid var(--gris-bord);
+    border-radius: 10px; font-size: 1rem; outline: none;
+    transition: border-color 0.2s; margin-bottom: 14px;
+    letter-spacing: 4px; text-align: center;
+  }
+  .login-box input[type="password"]:focus { border-color: var(--violet); }
+  .login-box input[type="password"].error { border-color: var(--rouge); }
+  .login-btn {
+    width: 100%; padding: 12px; background: var(--violet);
+    color: white; border: none; border-radius: 10px;
+    font-size: 0.95rem; font-weight: 700; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .login-btn:hover { background: var(--violet-fonce); }
+  .login-error {
+    color: var(--rouge); font-size: 0.8rem; margin-top: 10px;
+    display: none;
+  }
+  #app-content { display: none; }
+
   /* HEADER */
   header {
     background: linear-gradient(135deg, var(--violet-fonce) 0%, #2A0840 100%);
@@ -354,6 +397,24 @@
 </head>
 <body>
 
+<!-- ÉCRAN DE CONNEXION -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 46" fill="none" aria-label="Sophiae">
+        <text x="0" y="21" font-family="'Segoe UI', system-ui, sans-serif" font-size="16" font-weight="800" fill="#3D0C57" letter-spacing="1">SOPHIAE</text>
+        <text x="0" y="37" font-family="'Segoe UI', system-ui, sans-serif" font-size="9.5" font-weight="400" fill="#791BA5" letter-spacing="2">FORMATION</text>
+      </svg>
+    </div>
+    <h2>Auto-évaluation d'établissement</h2>
+    <p>Entrez le mot de passe pour accéder à la formation</p>
+    <input type="password" id="pwd-input" placeholder="••••••••" autocomplete="off" />
+    <button class="login-btn" onclick="checkPassword()">Accéder</button>
+    <div class="login-error" id="login-error">Mot de passe incorrect. Veuillez réessayer.</div>
+  </div>
+</div>
+
+<div id="app-content">
 <header>
   <div class="header-top">
     <div class="header-logo">
@@ -1649,6 +1710,25 @@ buildEngagements();
 
 // Ouvrir le premier domaine par défaut
 setTimeout(() => toggleDomaine('body-D1'), 200);
+
+// ========== LOGIN ==========
+function checkPassword() {
+  const input = document.getElementById('pwd-input');
+  const error = document.getElementById('login-error');
+  if (input.value === 'oswald') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-content').style.display = 'block';
+  } else {
+    input.classList.add('error');
+    error.style.display = 'block';
+    input.value = '';
+    setTimeout(() => { input.classList.remove('error'); }, 1500);
+  }
+}
+document.getElementById('pwd-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') checkPassword();
+});
 </script>
+</div><!-- /app-content -->
 </body>
 </html>
